@@ -1,0 +1,17 @@
+# DO NOT include azure-functions-worker in this file
+# The Python Worker is managed by Azure Functions platform
+# Manually managing azure-functions-worker may cause unexpected issues
+
+azure-functions
+requests
+azure-cosmos
+ipdb
+fastapi
+uvicorn
+python-multipart
+pydantic
+msal
+python-dateutil
+pytest==7.4.3
+pytest-cov==4.1.0
+httpx==0.25.1
