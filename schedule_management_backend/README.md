@@ -114,7 +114,7 @@ func azure functionapp publish <function-app-name>
 
 ### フォーム関連
 
-#### POST /api/storeFormData
+#### POST /api/store_form_data
 フォームデータを保存し、一意のトークンを返す
 
 ```json
@@ -133,7 +133,7 @@ func azure functionapp publish <function-app-name>
 }
 ```
 
-#### GET /api/retrieveFormData
+#### GET /api/retrieve_form_data
 保存されたフォームデータを取得
 
 ```
@@ -238,7 +238,3 @@ pytest --cov=app tests/
 3. **カレンダー同期エラー**
    - Graph APIの権限を確認
    - アクセストークンの有効期限を確認
-
-## ライセンス
-
-このプロジェクトは[MITライセンス](LICENSE)の下で公開されています。 
