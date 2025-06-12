@@ -21,28 +21,34 @@
 schedule_management/
 ├── api/                           # バックエンドAPI (Azure Functions + FastAPI)
 │   ├── app/                       # アプリケーションのメインディレクトリ
-│   │   ├── main.py               # FastAPIアプリケーションのエントリーポイント
-│   │   ├── config.py             # 設定値の管理
-│   │   ├── routers/              # APIエンドポイントの実装
-│   │   │   ├── form.py          # フォーム関連のエンドポイント
-│   │   │   └── schedule.py      # スケジュール関連のエンドポイント
-│   │   ├── schemas/              # リクエスト/レスポンスのスキーマ定義
-│   │   │   ├── __init__.py      # スキーマのエクスポート
-│   │   │   ├── form.py          # フォーム関連のスキーマ
-│   │   │   └── schedule.py      # スケジュール関連のスキーマ
-│   │   ├── internal/             # 内部モジュール
-│   │   │   ├── cosmos.py        # Cosmos DB関連の処理
-│   │   │   └── graph_api.py     # Graph API関連の処理
-│   │   └── utils/                # ユーティリティ関数
-│   │       └── time_utils.py    # 時間関連のユーティリティ
+│   │   ├── config.py              # 設定値の管理
+│   │   ├── dependencies.py       # 依存関係の管理
+│   │   ├── __init__.py            # アプリケーション初期化
+│   │   ├── routers/               # APIエンドポイントの実装
+│   │   │   ├── form.py           # フォーム関連のエンドポイント
+│   │   │   └── schedule.py       # スケジュール関連のエンドポイント
+│   │   ├── schemas/               # リクエスト/レスポンスのスキーマ定義
+│   │   │   ├── __init__.py       # スキーマのエクスポート
+│   │   │   ├── form.py           # フォーム関連のスキーマ
+│   │   │   └── schedule.py       # スケジュール関連のスキーマ
+│   │   ├── internal/              # 内部モジュール
+│   │   │   ├── cosmos.py         # Cosmos DB関連の処理
+│   │   │   ├── graph_api.py      # Graph API関連の処理
+│   │   │   └── mail.py           # メール送信機能
+│   │   └── utils/                 # ユーティリティ関数
+│   │       ├── time_utils.py     # 時間関連のユーティリティ
+│   │       └── formatters.py     # データフォーマット関数
 │   │
 │   ├── tests/                     # テストコード
-│   │   ├── test_form.py          # フォーム関連のテスト
-│   │   └── test_schedule.py      # スケジュール関連のテスト
+│   │   ├── conftest.py           # pytest設定
+│   │   ├── mocks.py              # モック関数
+│   │   ├── integration/          # 統合テスト
+│   │   └── unit/                 # ユニットテスト
 │   │
 │   ├── function_app.py            # Azure Functionsのエントリーポイント
-│   ├── main.py                    # フォーム関数とスケジュール関数の実装
+│   ├── main.py                    # メインのAPIロジック実装
 │   ├── requirements.txt           # Pythonの依存パッケージ
+│   ├── pytest.ini                # pytest設定ファイル
 │   ├── .funcignore                # Azure Functionsのデプロイ除外設定
 │   ├── host.json                  # Azure Functions設定ファイル
 │   └── local.settings.json        # ローカル環境変数設定
@@ -59,14 +65,8 @@ schedule_management/
     │   │       ├── ScheduleForm.tsx  # 日程設定フォーム
     │   │       └── CandidateList.tsx # 候補日時リスト表示
     │   │
-    │   ├── appointment/           # 予定選択ページ
-    │   │   └── page.tsx           # 候補日時選択画面
-    │   │
-    │   ├── interview/             # 面接情報ページ
-    │   │   └── page.tsx           # 面接詳細画面
-    │   │
-    │   └── profile/               # プロフィールページ
-    │       └── page.tsx           # ユーザープロフィール画面
+    │   └── appointment/           # 予定選択ページ
+    │       └── page.tsx           # 候補日時選択画面
     │
     ├── public/                    # 静的ファイル
     ├── node_modules/              # npmパッケージ
@@ -74,7 +74,11 @@ schedule_management/
     ├── package-lock.json          # 依存パッケージのバージョン固定
     ├── tsconfig.json              # TypeScript設定
     ├── tailwind.config.js         # Tailwind CSS設定
-    └── postcss.config.js          # PostCSS設定
+    ├── tailwind.config.ts         # Tailwind CSS TypeScript設定
+    ├── postcss.config.js          # PostCSS設定
+    ├── postcss.config.mjs         # PostCSS モジュール設定
+    ├── next.config.ts             # Next.js設定
+    └── eslint.config.mjs          # ESLint設定
 ```
 
 ### APIエンドポイント
@@ -95,8 +99,6 @@ schedule_management/
 - **ホームページ**（`/`）: スケジュール管理システムのエントリーポイント
 - **スケジュールページ**（`/schedule`）: 面接官の空き時間を検索し、候補日時を生成する画面
 - **アポイントメントページ**（`/appointment`）: 候補日時から希望の日時を選択する画面
-- **インタビューページ**（`/interview`）: 面接の詳細情報を表示する画面
-- **プロフィールページ**（`/profile`）: ユーザープロフィール設定画面
 
 ### データフロー
 
@@ -120,8 +122,16 @@ schedule_management/
 
 ### フロントエンド
 - TypeScript
-- Next.js
+- Next.js 15
+- React 19
 - Tailwind CSS
+- date-fns (日時処理)
+- Lucide React (アイコン)
+
+### 開発・テスト
+- pytest (テストフレームワーク)
+- ESLint (コード品質)
+- Turbopack (高速開発サーバー)
 
 ## セットアップ
 
@@ -140,13 +150,17 @@ schedule_management/
     "IsEncrypted": false,
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "python",
+        "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+        "AzureWebJobsStorage": "your-azure-storage-connection-string",
         "COSMOS_DB_ENDPOINT": "your-cosmos-db-endpoint",
         "COSMOS_DB_KEY": "your-cosmos-db-key",
         "TENANT_ID": "your-tenant-id",
         "CLIENT_ID": "your-client-id",
         "CLIENT_SECRET": "your-client-secret",
-        "BACKEND_URL": "http://localhost:7071",
-        "FRONT_URL": "http://localhost:3000"
+        "userId": "your-user-id"
+    },
+    "Host": {
+        "CORS": "*"
     }
 }
 ```
@@ -195,6 +209,23 @@ NEXT_PUBLIC_API_URL=http://localhost:7071
 
 ```bash
 npm run dev
+```
+
+## テスト実行
+
+```bash
+cd api
+# ユニットテストの実行
+pytest tests/unit/
+
+# 統合テストの実行
+pytest tests/integration/
+
+# 全テストの実行
+pytest
+
+# カバレッジ付きテスト実行
+pytest --cov=app tests/
 ```
 
 ## 使用方法
